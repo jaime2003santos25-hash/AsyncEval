@@ -1,0 +1,5 @@
+{
+  "id": "test_03",
+  "title": "Ordem de Execução no Event Loop (Node.js)",
+  "prompt": "Qual é a ordem exata de impressão no console do seguinte código JavaScript e porquê?\n\nconsole.log('1');\nsetTimeout(() => console.log('2'), 0);\nPromise.resolve().then(() => console.log('3'));\nprocess.nextTick(() => console.log('4'));\nconsole.log('5');"
+}

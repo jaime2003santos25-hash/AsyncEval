@@ -1,0 +1,5 @@
+{
+  "id": "test_10",
+  "title": "Deadlock em Canais sem Buffer (Go-style Concurrency)",
+  "prompt": "Analisa o risco de deadlock ao enviar dados para um canal sem buffer (unbuffered channel) numa arquitetura concorrente quando nenhuma goroutine está a escutar ativamente do outro lado."
+}

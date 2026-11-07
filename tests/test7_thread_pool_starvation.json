@@ -1,0 +1,5 @@
+{
+  "id": "test_07",
+  "title": "Inanição do Thread Pool (Node.js Libuv)",
+  "prompt": "Explica como a execução de uma operação síncrona pesada (como `crypto.pbkdf2Sync`) dentro do Node.js afeta o Thread Pool do libuv e bloqueia outras operações assíncronas de I/O. Como resolver?"
+}

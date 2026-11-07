@@ -1,0 +1,5 @@
+{
+  "id": "test_05",
+  "title": "Comportamento de Rejeição em Promise.all vs Promise.allSettled",
+  "prompt": "Explica detalhadamente o que acontece ao fluxo de execução quando uma única promessa falha dentro de um `Promise.all([p1, p2, p3])` comparado com `Promise.allSettled([p1, p2, p3])`, especialmente em cenários de alta concorrência de rede."
+}

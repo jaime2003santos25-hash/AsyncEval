@@ -1,0 +1,5 @@
+{
+  "id": "test_08",
+  "title": "Concorrência na Ponte Assíncrona (React Native)",
+  "prompt": "Em aplicações React Native, a comunicação entre a thread JavaScript e a thread Nativa (iOS/Android) é assíncrona e serializada por uma ponte (Bridge). O que acontece se duas chamadas concorrentes modificarem o mesmo estado nativo de forma assíncrona sem sincronização?"
+}

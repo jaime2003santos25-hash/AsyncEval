@@ -1,0 +1,5 @@
+{
+  "id": "test_09",
+  "title": "Impacto do GIL (Global Interpreter Lock) em Python",
+  "prompt": "O GIL em Python impede que múltiplas threads executem bytecode Python em paralelo numa máquina multi-core. Explica se o uso de `threading` melhora a performance em tarefas pesadas de CPU e qual a alternativa correta (ex: `multiprocessing`)."
+}

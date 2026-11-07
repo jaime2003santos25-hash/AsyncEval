@@ -1,0 +1,5 @@
+{
+  "id": "test_01",
+  "title": "Race Condition em Transação Assíncrona",
+  "prompt": "Analisa o seguinte código Node.js:\n\nlet balance = 100;\nasync function withdraw(amount) {\n  let current = balance;\n  await delay(10);\n  if (current >= amount) {\n    balance = current - amount;\n    return 'Success';\n  }\n  return 'Denied';\n}\n\nSe duas chamadas a withdraw(80) forem executadas concorrentemente, o saldo final fica correto? Explica o porquê e reescreve a função de forma segura."
+}

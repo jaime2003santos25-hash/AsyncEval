@@ -1,0 +1,5 @@
+{
+  "id": "test_04",
+  "title": "Vazamento de Memória por Closure Assíncrona",
+  "prompt": "Identifica o potencial problema de memória ou comportamento inesperado neste loop em JavaScript:\n\nlet listeners = [];\nfunction setupHandlers() {\n  for (var i = 0; i < 5; i++) {\n    setTimeout(async () => {\n      console.log(`Index: ${i}`);\n    }, i * 1000);\n  }\n}\nsetupHandlers();\n\nComo é que o uso de `var` em vez de `let`, combinado com operações assíncronas, afeta a variável e como corrigias?"
+}
