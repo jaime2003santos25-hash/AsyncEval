@@ -1,0 +1,21 @@
+{
+  "model": "gemini-3.8-flash",
+  "name": "Gemini 3.8 Flash (free tier)",
+  "test": "hard03_lock_no_barging",
+  "title": "asyncio.Lock fairness (no barging)",
+  "trial": 3,
+  "temperature": 0.7,
+  "date": "2026-11-08",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nlock = asyncio.Lock()\n\nasync def greedy():\n    for i in range(3):\n        async with lock:\n            print(f\"greedy: got lock {i}\")\n            await asyncio.sleep(0)\n            await asyncio.sleep(0)\n        # releases, then immediately tries to take the lock again\n\nasync def polite(name):\n    async with lock:\n        print(f\"{name}: got lock\")\n\nasync def main():\n    g = asyncio.create_task(greedy())\n    await asyncio.sleep(0)          # let greedy take the lock first\n    p1 = asyncio.create_task(polite(\"p1\"))\n    p2 = asyncio.create_task(polite(\"p2\"))\n    await asyncio.gather(g, p1, p2)\n    print(\"done\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "```json\n{\n  \"stdout\": [\n    \"greedy: got lock 0\",\n    \"p1: got lock\",\n    \"p2: got lock\",\n    \"greedy: got lock 1\",\n    \"greedy: got lock 2\",\n    \"done\"\n  ]\n}\n```",
+  "latency": 76.44,
+  "tokens": 7935,
+  "cost": 0,
+  "served_by": "gemini-3.8-flash",
+  "finish": "stop",
+  "graded": true,
+  "passed": true,
+  "partial": 1.0,
+  "reason": "acerto exato"
+}

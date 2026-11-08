@@ -1,0 +1,28 @@
+{
+  "id": "hard_05",
+  "title": "Python 3.12 eager task factory",
+  "why_hard": "With eager_task_factory (new in 3.12) a task runs synchronously until its first real suspension inside create_task(). This inverts the classic 'create_task never runs until you await' mental model that most training data teaches.",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def job(name):\n    print(f\"{name}: start\")\n    await asyncio.sleep(0)\n    print(f\"{name}: end\")\n\nasync def main():\n    loop = asyncio.get_running_loop()\n    loop.set_task_factory(asyncio.eager_task_factory)\n    t1 = asyncio.create_task(job(\"one\"))\n    print(\"main: after create one\")\n    t2 = asyncio.create_task(job(\"two\"))\n    print(\"main: after create two\")\n    await asyncio.gather(t1, t2)\n    print(\"main: done\")\n\nasyncio.run(main())\n```",
+  "expected_stdout": [
+    "one: start",
+    "main: after create one",
+    "two: start",
+    "main: after create two",
+    "one: end",
+    "two: end",
+    "main: done"
+  ],
+  "reference_answer": [
+    "one: start",
+    "main: after create one",
+    "two: start",
+    "main: after create two",
+    "one: end",
+    "two: end",
+    "main: done"
+  ],
+  "wrong_answers": [
+    "{\"stdout\": [\"main: done\", \"two: end\", \"one: end\", \"main: after create two\", \"two: start\", \"main: after create one\", \"one: start\"]}",
+    "{\"stdout\": [\"one: start\", \"main: after create one\", \"two: start\", \"main: after create two\", \"one: end\", \"two: end\"]}"
+  ]
+}

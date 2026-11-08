@@ -1,5 +1,18 @@
 {
   "id": "test_07",
   "title": "Inanição do Thread Pool (Node.js Libuv)",
-  "prompt": "Explica como a execução de uma operação síncrona pesada (como `crypto.pbkdf2Sync`) dentro do Node.js afeta o Thread Pool do libuv e bloqueia outras operações assíncronas de I/O. Como resolver?"
+  "prompt": "Explica como a execução de uma operação síncrona pesada (como `crypto.pbkdf2Sync`) dentro do Node.js afeta o Thread Pool do libuv e bloqueia outras operações assíncronas de I/O. Como resolver?",
+  "grader": {
+    "all_of": [
+      "event loop",
+      "main thread|thread principal",
+      "n[ãa]o (usa|utiliza|passa|vai|corre|executa)\\w*.{0,60}(thread ?pool|pool de threads|libuv)|(does not|doesn't|not) (use|go through|run on).{0,60}(thread ?pool|libuv)|(runs?|executa\\w*|corre\\w*).{0,40}(main thread|thread principal)",
+      "UV_THREADPOOL_SIZE|worker[_ ]threads|ass[ií]ncron|async|cluster"
+    ]
+  },
+  "reference_answer": "pbkdf2Sync não usa o thread pool do libuv: corre na thread principal e bloqueia o event loop, logo nenhum outro callback de I/O é atendido. A versão assíncrona pbkdf2 usa o thread pool (tamanho 4 por defeito, UV_THREADPOOL_SIZE). Resolve-se usando a versão assíncrona ou worker_threads.",
+  "wrong_answers": [
+    "O pbkdf2Sync ocupa as 4 threads do thread pool do libuv e por isso o I/O fica em fila.",
+    "Não tem impacto."
+  ]
 }

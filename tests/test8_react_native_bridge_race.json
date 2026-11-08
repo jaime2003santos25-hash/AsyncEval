@@ -1,5 +1,16 @@
 {
   "id": "test_08",
   "title": "Concorrência na Ponte Assíncrona (React Native)",
-  "prompt": "Em aplicações React Native, a comunicação entre a thread JavaScript e a thread Nativa (iOS/Android) é assíncrona e serializada por uma ponte (Bridge). O que acontece se duas chamadas concorrentes modificarem o mesmo estado nativo de forma assíncrona sem sincronização?"
+  "prompt": "Em aplicações React Native, a comunicação entre a thread JavaScript e a thread Nativa (iOS/Android) é assíncrona e serializada por uma ponte (Bridge). O que acontece se duas chamadas concorrentes modificarem o mesmo estado nativo de forma assíncrona sem sincronização?",
+  "grader": {
+    "all_of": [
+      "race|condi[çc][ãa]o de corrida|lost update|inconsist|last[- ]write|[úu]ltima escrita|sobrescrev|overwrit",
+      "serial|fila|queue|mutex|lock|synchroniz|sincroniz|at[óo]mic|single[- ]thread|thread [úu]nica"
+    ]
+  },
+  "reference_answer": "A ponte serializa as mensagens, mas não torna atómica a sequência ler-modificar-escrever: pode haver race condition com lost update (a última escrita sobrescreve a outra). Resolve-se serializando as operações numa fila no lado nativo ou usando operações atómicas.",
+  "wrong_answers": [
+    "Como a ponte é serializada nunca há problema nenhum.",
+    "O app simplesmente fecha sempre."
+  ]
 }

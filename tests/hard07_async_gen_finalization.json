@@ -1,0 +1,26 @@
+{
+  "id": "hard_07",
+  "title": "Abandoned async generator finalization",
+  "why_hard": "Breaking out of async-for does not run the generator's finally block synchronously. The loop's asyncgen hook schedules aclose() as a separate task, which here is started late and then cancelled by asyncio.run() mid-cleanup, so 'finally end' is never printed.",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def agen():\n    try:\n        for i in range(5):\n            yield i\n            await asyncio.sleep(0)\n    finally:\n        print(\"agen: finally start\")\n        await asyncio.sleep(0)\n        print(\"agen: finally end\")\n\nasync def consume():\n    async for x in agen():\n        print(\"got\", x)\n        if x == 1:\n            break\n    print(\"consume: after loop\")\n\nasync def main():\n    await consume()\n    print(\"main: after consume\")\n    await asyncio.sleep(0)\n    print(\"main: end\")\n\nasyncio.run(main())\n```",
+  "expected_stdout": [
+    "got 0",
+    "got 1",
+    "consume: after loop",
+    "main: after consume",
+    "main: end",
+    "agen: finally start"
+  ],
+  "reference_answer": [
+    "got 0",
+    "got 1",
+    "consume: after loop",
+    "main: after consume",
+    "main: end",
+    "agen: finally start"
+  ],
+  "wrong_answers": [
+    "{\"stdout\": [\"agen: finally start\", \"main: end\", \"main: after consume\", \"consume: after loop\", \"got 1\", \"got 0\"]}",
+    "{\"stdout\": [\"got 0\", \"got 1\", \"consume: after loop\", \"main: after consume\", \"main: end\"]}"
+  ]
+}

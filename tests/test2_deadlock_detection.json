@@ -1,5 +1,16 @@
 {
   "id": "test_02",
   "title": "Deadlock em Recursos Mutuamente Exclusivos",
-  "prompt": "Analisa o seguinte código Python com threads:\n\nimport threading\n\nlock_a = threading.Lock()\nlock_b = threading.Lock()\n\ndef task1():\n    lock_a.acquire()\n    lock_b.acquire()\n    print('Task 1 done')\n    lock_b.release()\n    lock_a.release()\n\ndef task2():\n    lock_b.acquire()\n    lock_a.acquire()\n    print('Task 2 done')\n    lock_a.release()\n    lock_b.release()\n\nO que acontece se `task1` e `task2` forem executadas em paralelo? Como se resolve este problema de deadlock?"
+  "prompt": "Analisa o seguinte código Python com threads:\n\nimport threading\n\nlock_a = threading.Lock()\nlock_b = threading.Lock()\n\ndef task1():\n    lock_a.acquire()\n    lock_b.acquire()\n    print('Task 1 done')\n    lock_b.release()\n    lock_a.release()\n\ndef task2():\n    lock_b.acquire()\n    lock_a.acquire()\n    print('Task 2 done')\n    lock_a.release()\n    lock_b.release()\n\nO que acontece se `task1` e `task2` forem executadas em paralelo? Como se resolve este problema de deadlock?",
+  "grader": {
+    "all_of": [
+      "deadlock|impasse|bloqueio m[úu]tuo",
+      "ordem|order|timeout|try[_ ]?lock|[úu]nico lock|single lock"
+    ]
+  },
+  "reference_answer": "Pode ocorrer deadlock: task1 segura lock_a e espera lock_b enquanto task2 segura lock_b e espera lock_a. Resolve-se adquirindo os locks sempre na mesma ordem, ou usando timeout no acquire.",
+  "wrong_answers": [
+    "Nada de especial acontece, as duas terminam sempre.",
+    "Fica mais lento mas funciona."
+  ]
 }

@@ -1,0 +1,20 @@
+{
+  "model": "deepseek/deepseek-chat",
+  "name": "DeepSeek chat",
+  "test": "test3_event_loop_order",
+  "title": "Ordem de Execução no Event Loop (Node.js)",
+  "trial": 1,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "Qual é a ordem exata de impressão no console do seguinte código JavaScript e porquê?\n\nconsole.log('1');\nsetTimeout(() => console.log('2'), 0);\nPromise.resolve().then(() => console.log('3'));\nprocess.nextTick(() => console.log('4'));\nconsole.log('5');\n\nFinish your reply with ONE JSON object on its own line, exactly: {\"stdout\": [\"line 1\", \"line 2\"]} (one item per output line, no trailing newline).",
+  "status": "ok",
+  "reply": "A ordem exata de impressão no console do código JavaScript fornecido é a seguinte:\n\n1. `console.log('1');` — Esta linha é executada imediatamente, pois é uma operação síncrona.\n2. `console.log('5');` — Esta linha também é executada imediatamente após a primeira, pois é outra operação síncrona.\n3. `process.nextTick(() => console.log('4'));` — A função passada para `process.nextTick` é executada imediatamente após a fase atual do event loop, antes de qualquer operação assíncrona como `setTimeout` ou `Promise`.\n4. `Promise.resolve().then(() => console.log('3'));` — A função passada para `Promise.resolve().then` é executada após todas as operações síncronas e após as funções `process.nextTick`, mas antes de qualquer `setTimeout`.\n5. `setTimeout(() => console.log('2'), 0);` — A função passada para `setTimeout` é executada após todas as operações síncronas e após as funções `process.nextTick` e `Promise`, pois `setTimeout` é uma operação assíncrona que é colocada na fila de callbacks do event loop.\n\nPortanto, a ordem de impressão no console será: `1`, `5`, `4`, `3`, `2`.\n\n{\"stdout\": [\"1\", \"5\", \"4\", \"3\", \"2\"]}",
+  "latency": 51.34,
+  "tokens": 450,
+  "cost": 0.00033096,
+  "served_by": "deepseek/deepseek-chat",
+  "graded": true,
+  "passed": true,
+  "partial": 1.0,
+  "reason": "acerto exato"
+}

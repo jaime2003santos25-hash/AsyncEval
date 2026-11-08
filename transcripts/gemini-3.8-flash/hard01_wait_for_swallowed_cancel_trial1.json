@@ -1,0 +1,21 @@
+{
+  "model": "gemini-3.8-flash",
+  "name": "Gemini 3.8 Flash (free tier)",
+  "test": "hard01_wait_for_swallowed_cancel",
+  "title": "wait_for when the coroutine swallows cancellation",
+  "trial": 1,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def stubborn():\n    try:\n        await asyncio.sleep(10)\n    except asyncio.CancelledError:\n        print(\"stubborn: cancelled, cleaning up\")\n        await asyncio.sleep(0)\n        print(\"stubborn: cleanup done\")\n        return \"recovered\"\n    return \"finished\"\n\nasync def main():\n    try:\n        result = await asyncio.wait_for(stubborn(), timeout=0.05)\n        print(\"result:\", result)\n    except asyncio.TimeoutError:\n        print(\"main: timeout\")\n    except asyncio.CancelledError:\n        print(\"main: cancelled\")\n    print(\"main: done\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "```json\n{\n  \"stdout\": [\n    \"stubborn: cancelled, cleaning up\",\n    \"stubborn: cleanup done\",\n    \"main: timeout\",\n    \"main: done\"\n  ]\n}\n```",
+  "latency": 101.49,
+  "tokens": 3741,
+  "cost": 0,
+  "served_by": "gemini-3.8-flash",
+  "finish": "stop",
+  "graded": true,
+  "passed": false,
+  "partial": 0.75,
+  "reason": "diferente"
+}

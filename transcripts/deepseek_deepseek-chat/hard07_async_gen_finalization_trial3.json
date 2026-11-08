@@ -1,0 +1,21 @@
+{
+  "model": "deepseek/deepseek-chat",
+  "name": "DeepSeek chat",
+  "test": "hard07_async_gen_finalization",
+  "title": "Abandoned async generator finalization",
+  "trial": 3,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def agen():\n    try:\n        for i in range(5):\n            yield i\n            await asyncio.sleep(0)\n    finally:\n        print(\"agen: finally start\")\n        await asyncio.sleep(0)\n        print(\"agen: finally end\")\n\nasync def consume():\n    async for x in agen():\n        print(\"got\", x)\n        if x == 1:\n            break\n    print(\"consume: after loop\")\n\nasync def main():\n    await consume()\n    print(\"main: after consume\")\n    await asyncio.sleep(0)\n    print(\"main: end\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "The program will produce the following output to stdout:\n\n1. `got 0` - This is printed when the `consume` coroutine first iterates over `agen` and gets the value `0`.\n2. `got 1` - This is printed when the `consume` coroutine iterates over `agen` and gets the value `1`.\n3. `consume: after loop` - This is printed after the `break` statement is executed in the `consume` coroutine.\n4. `agen: finally start` - This is printed when the `finally` block in the `agen` coroutine starts executing after the loop breaks.\n5. `agen: finally end` - This is printed after the `await asyncio.sleep(0)` in the `finally` block completes.\n6. `main: after consume` - This is printed after the `consume` coroutine completes and control returns to `main`.\n7. `main: end` - This is printed after the `await asyncio.sleep(0)` in `main` completes.\n\nHere is the JSON object representing the output:\n\n```json\n{\"stdout\": [\"got 0\", \"got 1\", \"consume: after loop\", \"agen: finally start\", \"agen: finally end\", \"main: after consume\", \"main: end\"]}\n```",
+  "latency": 12.92,
+  "tokens": 562,
+  "cost": 0.00034115,
+  "served_by": "deepseek/deepseek-chat",
+  "finish": "stop",
+  "graded": true,
+  "passed": false,
+  "partial": 0.429,
+  "reason": "diferente"
+}

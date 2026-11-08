@@ -1,5 +1,17 @@
 {
   "id": "test_09",
   "title": "Impacto do GIL (Global Interpreter Lock) em Python",
-  "prompt": "O GIL em Python impede que múltiplas threads executem bytecode Python em paralelo numa máquina multi-core. Explica se o uso de `threading` melhora a performance em tarefas pesadas de CPU e qual a alternativa correta (ex: `multiprocessing`)."
+  "prompt": "O GIL em Python impede que múltiplas threads executem bytecode Python em paralelo numa máquina multi-core. Explica se o uso de `threading` melhora a performance em tarefas pesadas de CPU e qual a alternativa correta (ex: `multiprocessing`).",
+  "grader": {
+    "all_of": [
+      "n[ãa]o (melhora|ajuda|traz|acelera|h[áa] ganho)|no (real )?(speedup|benefit|improvement|performance gain)|not (improve|help|faster|speed)|pior|slower|overhead",
+      "multiprocessing|processos|processes",
+      "I/O|E/S|entrada e sa[ií]da"
+    ]
+  },
+  "reference_answer": "Para tarefas pesadas de CPU o threading não melhora a performance, pode até piorar por overhead, porque o GIL permite uma thread de cada vez. Para I/O-bound ajuda. A alternativa é multiprocessing (processos separados) ou extensões nativas.",
+  "wrong_answers": [
+    "O threading acelera tarefas de CPU em máquinas multi-core.",
+    "O GIL só existe em Windows."
+  ]
 }

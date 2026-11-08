@@ -1,0 +1,21 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "name": "GPT-4o-mini (baseline)",
+  "test": "hard05_eager_task_factory",
+  "title": "Python 3.12 eager task factory",
+  "trial": 1,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def job(name):\n    print(f\"{name}: start\")\n    await asyncio.sleep(0)\n    print(f\"{name}: end\")\n\nasync def main():\n    loop = asyncio.get_running_loop()\n    loop.set_task_factory(asyncio.eager_task_factory)\n    t1 = asyncio.create_task(job(\"one\"))\n    print(\"main: after create one\")\n    t2 = asyncio.create_task(job(\"two\"))\n    print(\"main: after create two\")\n    await asyncio.gather(t1, t2)\n    print(\"main: done\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "To analyze the provided Python program and predict its output, let's break down the execution flow step by step.\n\n1. The `async def job(name)` function is defined, which prints a start message, awaits a sleep (that yields control), and then prints an end message.\n2. The `async def main()` function is defined. Here, it:\n   - Gets the current running event loop.\n   - Sets the task factory to `asyncio.eager_task_factory`, which is used to create tasks that are run as soon as they are created and can allow for concurrent execution.\n   - Creates the first task `t1` for the job \"one\" and prints \"main: after create one\".\n   - Creates the second task `t2` for the job \"two\" and prints \"main: after create two\".\n   - Awaits the completion of both tasks using `asyncio.gather(t1, t2)`.\n   - After both tasks are completed, it prints \"main: done\".\n\nNow let's predict the output in order:\n\n- When `job(\"one\")` starts, it prints `one: start`.\n- After yielding control with `await asyncio.sleep(0)`, it allows the event loop to switch to the next task.\n- The `job(\"two\")` starts while `job(\"one\")` is waiting. It prints `two: start`.\n- After `job(\"two\")` also yields control, the control returns to `job(\"one\")`, which then prints `one: end`.\n- The control returns to `job(\"two\")`, which then prints `two: end`.\n- After both tasks are completed, control returns to the `main()` function, which then prints `main: done`.\n\nThe exact order of printed lines will be:\n1. `one: start`\n2. `main: after create one`\n3. `two: start`\n4. `main: after create two`\n5. `one: end`\n6. `two: end`\n7. `main: done`\n\nPutting this together, the final output is:\n\n```json\n{\"stdout\": [\"one: start\", \"main: after create one\", \"two: start\", \"main: after create two\", \"one: end\", \"two: end\", \"main: done\"]}\n```",
+  "latency": 6.69,
+  "tokens": 727,
+  "cost": 0.00032055,
+  "served_by": "openai/gpt-4o-mini",
+  "finish": "stop",
+  "graded": true,
+  "passed": true,
+  "partial": 1.0,
+  "reason": "acerto exato"
+}

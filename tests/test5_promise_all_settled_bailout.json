@@ -1,5 +1,19 @@
 {
   "id": "test_05",
   "title": "Comportamento de Rejeição em Promise.all vs Promise.allSettled",
-  "prompt": "Explica detalhadamente o que acontece ao fluxo de execução quando uma única promessa falha dentro de um `Promise.all([p1, p2, p3])` comparado com `Promise.allSettled([p1, p2, p3])`, especialmente em cenários de alta concorrência de rede."
+  "prompt": "Explica detalhadamente o que acontece ao fluxo de execução quando uma única promessa falha dentro de um `Promise.all([p1, p2, p3])` comparado com `Promise.allSettled([p1, p2, p3])`, especialmente em cenários de alta concorrência de rede.",
+  "grader": {
+    "all_of": [
+      "allSettled",
+      "status",
+      "rejeit|reject|falh|fail",
+      "fail[- ]?fast|curto|short[- ]?circuit|imediat|assim que|as soon as|primeira? rejei",
+      "n[ãa]o cancel|not cancel|continu\\w+ (a )?(execut|run)|still run|n[ãa]o (aborta|interrompe)|keep(s)? running"
+    ]
+  },
+  "reference_answer": "Promise.all rejeita imediatamente (fail-fast) com o motivo da primeira promessa que falha, mas as outras continuam a executar, não são canceladas. Promise.allSettled espera todas e devolve um array de objetos com status 'fulfilled' ou 'rejected', nunca rejeita.",
+  "wrong_answers": [
+    "Promise.all cancela as outras promessas quando uma falha.",
+    "São equivalentes."
+  ]
 }

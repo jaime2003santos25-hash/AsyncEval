@@ -1,0 +1,20 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "name": "GPT-4o-mini (baseline pequeno)",
+  "test": "test3_event_loop_order",
+  "title": "Ordem de Execução no Event Loop (Node.js)",
+  "trial": 1,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "Qual é a ordem exata de impressão no console do seguinte código JavaScript e porquê?\n\nconsole.log('1');\nsetTimeout(() => console.log('2'), 0);\nPromise.resolve().then(() => console.log('3'));\nprocess.nextTick(() => console.log('4'));\nconsole.log('5');\n\nFinish your reply with ONE JSON object on its own line, exactly: {\"stdout\": [\"line 1\", \"line 2\"]} (one item per output line, no trailing newline).",
+  "status": "ok",
+  "reply": "A ordem de impressão no console do código JavaScript fornecido será a seguinte:\n\n1. `console.log('1');` - Isso é uma chamada de função síncrona, então '1' é impresso imediatamente.\n2. `setTimeout(() => console.log('2'), 0);` - Essa chamada é assíncrona e será executada após o tempo especificado (neste caso, 0 milissegundos), mas somente após a execução do código atual e de todas as Promises resolvidas.\n3. `Promise.resolve().then(() => console.log('3'));` - As Promises são executadas na microtask queue, que tem prioridade sobre a task queue. Portanto, '3' será impresso antes de '2'.\n4. `process.nextTick(() => console.log('4'));` - `process.nextTick` também é parte da microtask queue, e será executado antes das Promises. Assim, '4' será impresso logo após '3'.\n5. `console.log('5');` - Esta é mais uma chamada síncrona, então '5' será impresso imediatamente após as linhas anteriores.\n\nPortanto, a ordem de impressão será:\n- '1'\n- '5'\n- '4'\n- '3'\n- '2'\n\nAssim, a saída final será:\n\n```json\n{\"stdout\": [\"1\", \"5\", \"4\", \"3\", \"2\"]}\n```",
+  "latency": 7.09,
+  "tokens": 421,
+  "cost": 0.0001959,
+  "served_by": "openai/gpt-4o-mini",
+  "graded": true,
+  "passed": true,
+  "partial": 1.0,
+  "reason": "acerto exato"
+}

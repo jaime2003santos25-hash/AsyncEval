@@ -1,0 +1,21 @@
+{
+  "model": "gemini-3.8-flash",
+  "name": "Gemini 3.8 Flash (free tier)",
+  "test": "test3_event_loop_order",
+  "title": "Ordem de Execução no Event Loop (Node.js)",
+  "trial": 1,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "Qual é a ordem exata de impressão no console do seguinte código JavaScript e porquê?\n\nconsole.log('1');\nsetTimeout(() => console.log('2'), 0);\nPromise.resolve().then(() => console.log('3'));\nprocess.nextTick(() => console.log('4'));\nconsole.log('5');\n\nFinish your reply with ONE JSON object on its own line, exactly: {\"stdout\": [\"line 1\", \"line 2\"]} (one item per output line, no trailing newline).",
+  "status": "ok",
+  "reply": "A ordem exata de impressão no console é:\n\n**`1`**, **`5`**, **`4`**, **`3`**, **`2`**\n\n---\n\n### Explicação detalhada\n\nO comportamento do código é determinado pelo modelo de concorrência do Node.js (Call Stack, filas de microtarefas e o Event Loop):\n\n1. **Execução Síncrona (Call Stack):**\n   - `console.log('1')` é executado imediatamente $\\rightarrow$ imprime **`1`**.\n   - `setTimeout(..., 0)` agenda uma macrotarefa na fase de *Timers* do Event Loop.\n   - `Promise.resolve().then(...)` agenda uma microtarefa na fila de microtarefas (*Promise reaction queue*).\n   - `process.nextTick(...)` agenda uma função na `nextTickQueue`.\n   - `console.log('5')` é executado imediatamente $\\rightarrow$ imprime **`5`**.\n\n2. **Drenagem da `nextTickQueue`:**\n   - Assim que a pilha síncrona atual é esvaziada, o Node.js processa a `nextTickQueue` antes de qualquer outra microtarefa ou fase do Event Loop.\n   - O callback de `process.nextTick` executa $\\rightarrow$ imprime **`4`**.\n\n3. **Drenagem da Fila de Microtarefas (Microtasks / Promises):**\n   - Esgotada a `nextTickQueue`, o runtime consome a fila de microtarefas padrão.\n   - O callback do `Promise.resolve().then(...)` executa $\\rightarrow$ imprime **`3`**.\n\n4. **Event Loop — Fase de Timers (Macrotasks):**\n   - Todas as microtarefas foram executadas. O Event Loop avança para a fase de *Timers*.\n   - O temporizador de `0` ms (ajustado para o mínimo de ~1ms pela especificação) expirou.\n   - O callback do `setTimeout` executa $\\rightarrow$ imprime **`2`**.\n\n{\"stdout\": [\"1\", \"5\", \"4\", \"3\", \"2\"]}",
+  "latency": 37.96,
+  "tokens": 1202,
+  "cost": 0,
+  "served_by": "gemini-3.8-flash",
+  "finish": "stop",
+  "graded": true,
+  "passed": true,
+  "partial": 1.0,
+  "reason": "acerto exato"
+}

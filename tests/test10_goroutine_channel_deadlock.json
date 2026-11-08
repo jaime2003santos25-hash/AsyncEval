@@ -1,5 +1,17 @@
 {
   "id": "test_10",
   "title": "Deadlock em Canais sem Buffer (Go-style Concurrency)",
-  "prompt": "Analisa o risco de deadlock ao enviar dados para um canal sem buffer (unbuffered channel) numa arquitetura concorrente quando nenhuma goroutine está a escutar ativamente do outro lado."
+  "prompt": "Analisa o risco de deadlock ao enviar dados para um canal sem buffer (unbuffered channel) numa arquitetura concorrente quando nenhuma goroutine está a escutar ativamente do outro lado.",
+  "grader": {
+    "all_of": [
+      "bloque|block",
+      "deadlock",
+      "buffer|select|default|timeout|goroutine|context"
+    ]
+  },
+  "reference_answer": "Um envio num canal sem buffer bloqueia até existir um receptor; sem ninguém a escutar a goroutine fica bloqueada para sempre e, se todas bloquearem, o runtime reporta deadlock. Mitiga-se com um receptor numa goroutine, canal com buffer, ou select com default/timeout.",
+  "wrong_answers": [
+    "O envio é assíncrono e nunca bloqueia.",
+    "Os dados perdem-se mas não há problema."
+  ]
 }

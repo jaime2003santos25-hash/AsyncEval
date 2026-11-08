@@ -1,0 +1,21 @@
+{
+  "model": "deepseek/deepseek-chat",
+  "name": "DeepSeek chat",
+  "test": "hard04_contextvar_propagation",
+  "title": "contextvars across tasks, callbacks, threads and executors",
+  "trial": 3,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\nimport contextvars\n\nvar = contextvars.ContextVar(\"var\", default=\"root\")\n\nasync def child(tag):\n    print(f\"{tag}: sees {var.get()}\")\n    var.set(f\"set-by-{tag}\")\n    await asyncio.sleep(0)\n    print(f\"{tag}: after sleep sees {var.get()}\")\n\nasync def main():\n    var.set(\"main-1\")\n    t1 = asyncio.create_task(child(\"t1\"))\n    var.set(\"main-2\")\n    t2 = asyncio.create_task(child(\"t2\"))\n    await t1\n    print(\"main: after t1 sees\", var.get())\n    await child(\"inline\")\n    print(\"main: after inline sees\", var.get())\n    await t2\n    loop = asyncio.get_running_loop()\n    loop.call_soon(lambda: print(\"cb: sees\", var.get()))\n    var.set(\"main-3\")\n    await asyncio.sleep(0)\n    await asyncio.to_thread(lambda: print(\"thread: sees\", var.get()))\n    await loop.run_in_executor(None, lambda: print(\"executor: sees\", var.get()))\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "Let’s analyze the program step by step:\n\n1. **Initialization**:\n   - `var` is a `ContextVar` with a default value of `\"root\"`.\n\n2. **`main()` function**:\n   - `var` is set to `\"main-1\"`.\n   - Task `t1` is created with `child(\"t1\")`. This schedules `child(\"t1\")` to run.\n   - `var` is set to `\"main-2\"`.\n   - Task `t2` is created with `child(\"t2\")`. This schedules `child(\"t2\")` to run.\n   - `await t1` waits for `t1` to complete.\n   - After `t1` completes, `var` is printed, showing its current value.\n   - `await child(\"inline\")` runs `child(\"inline\")` synchronously.\n   - After `child(\"inline\")` completes, `var` is printed again.\n   - `await t2` waits for `t2` to complete.\n   - A callback is scheduled to run immediately after the current task completes.\n   - `var` is set to `\"main-3\"`.\n   - `await asyncio.sleep(0)` yields control to the event loop, allowing the callback to run.\n   - `await asyncio.to_thread(...)` runs a function in a separate thread, printing the value of `var`.\n   - `await loop.run_in_executor(...)` runs a function in the default executor, printing the value of `var`.\n\n3. **`child(tag)` function**:\n   - Prints the current value of `var`.\n   - Sets `var` to `\"set-by-{tag}\"`.\n   - `await asyncio.sleep(0)` yields control to the event loop.\n   - Prints the current value of `var` after resuming.\n\n4. **Execution order**:\n   - Tasks `t1` and `t2` run concurrently, but their output depends on when they are scheduled and when they yield control.\n   - The callback, thread, and executor functions run after all tasks are complete.\n\n### Predicted output:\n```\nt1: sees main-2\nt1: after sleep sees set-by-t1\nmain: after t1 sees main-2\ninline: sees main-2\ninline: after sleep sees set-by-inline\nmain: after inline sees set-by-inline\nt2: sees set-by-inline\nt2: after sleep sees set-by-t2\ncb: sees main-3\nthread: sees root\nexecutor: sees root\n```\n\n### JSON output:\n```json\n{\"stdout\": [\"t1: sees main-2\", \"t1: after sleep sees set-by-t1\", \"main: after t1 sees main-2\", \"inline: sees main-2\", \"inline: after sleep sees set-by-inline\", \"main: after inline sees set-by-inline\", \"t2: sees set-by-inline\", \"t2: after sleep sees set-by-t2\", \"cb: sees main-3\", \"thread: sees root\", \"executor: sees root\"]}\n```",
+  "latency": 28.38,
+  "tokens": 1070,
+  "cost": 0.00072658,
+  "served_by": "deepseek/deepseek-chat",
+  "finish": "stop",
+  "graded": true,
+  "passed": false,
+  "partial": 0.091,
+  "reason": "diferente"
+}

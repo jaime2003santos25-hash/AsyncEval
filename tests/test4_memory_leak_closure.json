@@ -1,5 +1,17 @@
 {
   "id": "test_04",
   "title": "Vazamento de Memória por Closure Assíncrona",
-  "prompt": "Identifica o potencial problema de memória ou comportamento inesperado neste loop em JavaScript:\n\nlet listeners = [];\nfunction setupHandlers() {\n  for (var i = 0; i < 5; i++) {\n    setTimeout(async () => {\n      console.log(`Index: ${i}`);\n    }, i * 1000);\n  }\n}\nsetupHandlers();\n\nComo é que o uso de `var` em vez de `let`, combinado com operações assíncronas, afeta a variável e como corrigias?"
+  "prompt": "Identifica o potencial problema de memória ou comportamento inesperado neste loop em JavaScript:\n\nlet listeners = [];\nfunction setupHandlers() {\n  for (var i = 0; i < 5; i++) {\n    setTimeout(async () => {\n      console.log(`Index: ${i}`);\n    }, i * 1000);\n  }\n}\nsetupHandlers();\n\nComo é que o uso de `var` em vez de `let`, combinado com operações assíncronas, afeta a variável e como corrigias?",
+  "grader": {
+    "all_of": [
+      "Index:\\s*5|(cinco|five|5)\\s*(vezes|times)|imprim\\w*.{0,40}\\b5\\b|prints?.{0,40}\\b5\\b",
+      "\\blet\\b",
+      "escopo|scope|closure"
+    ]
+  },
+  "reference_answer": "Com var, i tem escopo de função e é partilhado pela closure; quando os timeouts disparam o loop já terminou e i vale 5, por isso imprime 'Index: 5' cinco vezes. Corrige-se com let (escopo de bloco).",
+  "wrong_answers": [
+    "Imprime Index: 0, 1, 2, 3, 4 normalmente.",
+    "O problema é só a função ser async."
+  ]
 }

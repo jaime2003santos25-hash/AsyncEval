@@ -1,0 +1,36 @@
+{
+  "id": "hard_04",
+  "title": "contextvars across tasks, callbacks, threads and executors",
+  "why_hard": "create_task copies the context at creation time; awaiting a coroutine inline shares the context; call_soon captures the current context; asyncio.to_thread copies the context but loop.run_in_executor does not. Five different rules in one program.",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\nimport contextvars\n\nvar = contextvars.ContextVar(\"var\", default=\"root\")\n\nasync def child(tag):\n    print(f\"{tag}: sees {var.get()}\")\n    var.set(f\"set-by-{tag}\")\n    await asyncio.sleep(0)\n    print(f\"{tag}: after sleep sees {var.get()}\")\n\nasync def main():\n    var.set(\"main-1\")\n    t1 = asyncio.create_task(child(\"t1\"))\n    var.set(\"main-2\")\n    t2 = asyncio.create_task(child(\"t2\"))\n    await t1\n    print(\"main: after t1 sees\", var.get())\n    await child(\"inline\")\n    print(\"main: after inline sees\", var.get())\n    await t2\n    loop = asyncio.get_running_loop()\n    loop.call_soon(lambda: print(\"cb: sees\", var.get()))\n    var.set(\"main-3\")\n    await asyncio.sleep(0)\n    await asyncio.to_thread(lambda: print(\"thread: sees\", var.get()))\n    await loop.run_in_executor(None, lambda: print(\"executor: sees\", var.get()))\n\nasyncio.run(main())\n```",
+  "expected_stdout": [
+    "t1: sees main-1",
+    "t2: sees main-2",
+    "t1: after sleep sees set-by-t1",
+    "t2: after sleep sees set-by-t2",
+    "main: after t1 sees main-2",
+    "inline: sees main-2",
+    "inline: after sleep sees set-by-inline",
+    "main: after inline sees set-by-inline",
+    "cb: sees set-by-inline",
+    "thread: sees main-3",
+    "executor: sees root"
+  ],
+  "reference_answer": [
+    "t1: sees main-1",
+    "t2: sees main-2",
+    "t1: after sleep sees set-by-t1",
+    "t2: after sleep sees set-by-t2",
+    "main: after t1 sees main-2",
+    "inline: sees main-2",
+    "inline: after sleep sees set-by-inline",
+    "main: after inline sees set-by-inline",
+    "cb: sees set-by-inline",
+    "thread: sees main-3",
+    "executor: sees root"
+  ],
+  "wrong_answers": [
+    "{\"stdout\": [\"executor: sees root\", \"thread: sees main-3\", \"cb: sees set-by-inline\", \"main: after inline sees set-by-inline\", \"inline: after sleep sees set-by-inline\", \"inline: sees main-2\", \"main: after t1 sees main-2\", \"t2: after sleep sees set-by-t2\", \"t1: after sleep sees set-by-t1\", \"t2: sees main-2\", \"t1: sees main-1\"]}",
+    "{\"stdout\": [\"t1: sees main-1\", \"t2: sees main-2\", \"t1: after sleep sees set-by-t1\", \"t2: after sleep sees set-by-t2\", \"main: after t1 sees main-2\", \"inline: sees main-2\", \"inline: after sleep sees set-by-inline\", \"main: after inline sees set-by-inline\", \"cb: sees set-by-inline\", \"thread: sees main-3\"]}"
+  ]
+}

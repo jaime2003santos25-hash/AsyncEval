@@ -1,0 +1,21 @@
+{
+  "model": "deepseek/deepseek-chat",
+  "name": "DeepSeek chat",
+  "test": "hard05_eager_task_factory",
+  "title": "Python 3.12 eager task factory",
+  "trial": 3,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def job(name):\n    print(f\"{name}: start\")\n    await asyncio.sleep(0)\n    print(f\"{name}: end\")\n\nasync def main():\n    loop = asyncio.get_running_loop()\n    loop.set_task_factory(asyncio.eager_task_factory)\n    t1 = asyncio.create_task(job(\"one\"))\n    print(\"main: after create one\")\n    t2 = asyncio.create_task(job(\"two\"))\n    print(\"main: after create two\")\n    await asyncio.gather(t1, t2)\n    print(\"main: done\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "The given Python program uses `asyncio` to run asynchronous tasks. Here's a breakdown of what happens:\n\n1. The `main` coroutine is executed by `asyncio.run(main())`.\n2. Inside `main`, the event loop is retrieved and the task factory is set to `asyncio.eager_task_factory`, which ensures that tasks start running immediately when created.\n3. `t1 = asyncio.create_task(job(\"one\"))` creates and starts the task `job(\"one\")`. Since the task factory is eager, the task starts immediately.\n4. The task `job(\"one\")` prints `\"one: start\"` and then awaits `asyncio.sleep(0)`, which yields control back to the event loop.\n5. Control returns to `main`, which then prints `\"main: after create one\"`.\n6. `t2 = asyncio.create_task(job(\"two\"))` creates and starts the task `job(\"two\")`. Again, the task starts immediately due to the eager task factory.\n7. The task `job(\"two\")` prints `\"two: start\"` and then awaits `asyncio.sleep(0)`, yielding control back to the event loop.\n8. Control returns to `main`, which then prints `\"main: after create two\"`.\n9. `await asyncio.gather(t1, t2)` waits for both tasks to complete. Since both tasks have already yielded control, they continue executing.\n10. `job(\"one\")` resumes and prints `\"one: end\"`.\n11. `job(\"two\")` resumes and prints `\"two: end\"`.\n12. Finally, `main` prints `\"main: done\"`.\n\nThe exact order of output is:\n\n```plaintext\none: start\nmain: after create one\ntwo: start\nmain: after create two\none: end\ntwo: end\nmain: done\n```\n\nTherefore, the JSON object representing the stdout is:\n\n```json\n{\"stdout\": [\"one: start\", \"main: after create one\", \"two: start\", \"main: after create two\", \"one: end\", \"two: end\", \"main: done\"]}\n```",
+  "latency": 20.17,
+  "tokens": 746,
+  "cost": 0.00050491,
+  "served_by": "deepseek/deepseek-chat",
+  "finish": "stop",
+  "graded": true,
+  "passed": true,
+  "partial": 1.0,
+  "reason": "acerto exato"
+}

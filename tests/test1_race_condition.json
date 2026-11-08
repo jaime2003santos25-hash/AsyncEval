@@ -1,5 +1,17 @@
 {
   "id": "test_01",
   "title": "Race Condition em Transação Assíncrona",
-  "prompt": "Analisa o seguinte código Node.js:\n\nlet balance = 100;\nasync function withdraw(amount) {\n  let current = balance;\n  await delay(10);\n  if (current >= amount) {\n    balance = current - amount;\n    return 'Success';\n  }\n  return 'Denied';\n}\n\nSe duas chamadas a withdraw(80) forem executadas concorrentemente, o saldo final fica correto? Explica o porquê e reescreve a função de forma segura."
+  "prompt": "Analisa o seguinte código Node.js:\n\nlet balance = 100;\nasync function withdraw(amount) {\n  let current = balance;\n  await delay(10);\n  if (current >= amount) {\n    balance = current - amount;\n    return 'Success';\n  }\n  return 'Denied';\n}\n\nSe duas chamadas a withdraw(80) forem executadas concorrentemente, o saldo final fica correto? Explica o porquê e reescreve a função de forma segura.",
+  "grader": {
+    "all_of": [
+      "race|condi[çc][ãa]o de corrida|concorr[êe]ncia|lost update|ambas|both|simult[âa]ne|ao mesmo tempo|intercal|interleav",
+      "\\b20\\b",
+      "mutex|lock|sem[áa]foro|semaphore|at[óo]mic|fila|queue|serializ|reler|re-?read|verifica.{0,20}ap[óo]s"
+    ]
+  },
+  "reference_answer": "Não. Há uma race condition: as duas chamadas leem current = 100 antes do delay, ambas passam no if e ambas retornam Success; o saldo final fica 20 (e não -60). Corrige com um mutex/lock que serializa as chamadas, ou relendo o saldo depois do await.",
+  "wrong_answers": [
+    "Sim, o saldo final fica correto: uma retorna Success e a outra Denied, saldo 20.",
+    "Não é seguro porque o JavaScript é lento."
+  ]
 }

@@ -1,0 +1,21 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "name": "Gemini 3.5 Flash-Lite (free tier)",
+  "test": "hard07_async_gen_finalization",
+  "title": "Abandoned async generator finalization",
+  "trial": 2,
+  "temperature": 0.7,
+  "date": "2026-11-08",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def agen():\n    try:\n        for i in range(5):\n            yield i\n            await asyncio.sleep(0)\n    finally:\n        print(\"agen: finally start\")\n        await asyncio.sleep(0)\n        print(\"agen: finally end\")\n\nasync def consume():\n    async for x in agen():\n        print(\"got\", x)\n        if x == 1:\n            break\n    print(\"consume: after loop\")\n\nasync def main():\n    await consume()\n    print(\"main: after consume\")\n    await asyncio.sleep(0)\n    print(\"main: end\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "To determine the exact output of the program, let's trace its execution step by step under the default asyncio event loop in Python 3.12:\n\n1. `asyncio.run(main())` starts the event loop and runs the `main()` coroutine.\n2. `main()` calls `await consume()`.\n3. `consume()` enters the `async for x in agen():` loop.\n4. The `agen()` async generator starts:\n   - `i = 0`: yields `0`.\n   - `consume()` receives `0`, prints `got 0`.\n   - `agen()` executes `await asyncio.sleep(0)`, yielding control back to the event loop momentarily, then resumes.\n   - `i = 1`: yields `1`.\n   - `consume()` receives `1`, prints `got 1`.\n   - Since `x == 1`, the `break` statement is executed, exiting the `async for` loop prematurely.\n5. Exiting an async generator via a `break` triggers its `finally` block (via generator cleanup / `aclose()`):\n   - `agen: finally start` is printed.\n   - `await asyncio.sleep(0)` pauses the generator cleanup.\n   - The event loop resumes control, allowing `consume()` to continue.\n6. `consume()` reaches the end of the function and prints `consume: after loop`, returning control to `main()`.\n7. `main()` continues and prints `main: after consume`.\n8. `main()` executes `await asyncio.sleep(0)`. During this yield point, the suspended `agen` finally block is resumed:\n   - It completes the `await asyncio.sleep(0)` inside the `finally` block.\n   - `agen: finally end` is printed.\n9. Finally, `main()` resumes and prints `main: end`.\n\nPutting it all together, the exact sequence of lines written to stdout is:\n\n```\ngot 0\ngot 1\nagen: finally start\nconsume: after loop\nmain: after consume\nagen: finally end\nmain: end\n```\n\n```json\n{\"stdout\": [\"got 0\", \"got 1\", \"agen: finally start\", \"consume: after loop\", \"main: after consume\", \"agen: finally end\", \"main: end\"]}\n```",
+  "latency": 2.31,
+  "tokens": 791,
+  "cost": 0,
+  "served_by": "gemini-3.5-flash-lite",
+  "finish": "stop",
+  "graded": true,
+  "passed": false,
+  "partial": 0.286,
+  "reason": "diferente"
+}

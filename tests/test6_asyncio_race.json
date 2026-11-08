@@ -1,5 +1,15 @@
 {
   "id": "test_06",
   "title": "Race Condition em Asyncio (Python)",
-  "prompt": "Analisa o seguinte código Python assíncrono:\n\nimport asyncio\n\ncounter = 0\n\nasync def increment():\n    global counter\n    val = counter\n    await asyncio.sleep(0.01)\n    counter = val + 1\n\nasync def main():\n    await asyncio.gather(*(increment() for _ in range(100)))\n    print(counter)\n\nasyncio.run(main())\n\nO valor final impresso de `counter` será exatamente 100? Explica o porquê, tendo em conta o modelo de execução assíncrona de单 thread do Python, e indica como corrigir."
+  "prompt": "Analisa o seguinte código Python assíncrono:\n\nimport asyncio\n\ncounter = 0\n\nasync def increment():\n    global counter\n    val = counter\n    await asyncio.sleep(0.01)\n    counter = val + 1\n\nasync def main():\n    await asyncio.gather(*(increment() for _ in range(100)))\n    print(counter)\n\nasyncio.run(main())\n\nO valor final impresso de `counter` será exatamente 100? Explica o porquê, tendo em conta o modelo de execução assíncrona dethread única do Python, e indica como corrigir.",
+  "expected_stdout": [
+    "1"
+  ],
+  "reference_answer": [
+    "1"
+  ],
+  "wrong_answers": [
+    "{\"stdout\": [\"100\"]}",
+    "{\"stdout\": [\"0\"]}"
+  ]
 }

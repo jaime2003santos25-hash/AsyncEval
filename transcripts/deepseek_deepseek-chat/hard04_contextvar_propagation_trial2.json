@@ -1,0 +1,21 @@
+{
+  "model": "deepseek/deepseek-chat",
+  "name": "DeepSeek chat",
+  "test": "hard04_contextvar_propagation",
+  "title": "contextvars across tasks, callbacks, threads and executors",
+  "trial": 2,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\nimport contextvars\n\nvar = contextvars.ContextVar(\"var\", default=\"root\")\n\nasync def child(tag):\n    print(f\"{tag}: sees {var.get()}\")\n    var.set(f\"set-by-{tag}\")\n    await asyncio.sleep(0)\n    print(f\"{tag}: after sleep sees {var.get()}\")\n\nasync def main():\n    var.set(\"main-1\")\n    t1 = asyncio.create_task(child(\"t1\"))\n    var.set(\"main-2\")\n    t2 = asyncio.create_task(child(\"t2\"))\n    await t1\n    print(\"main: after t1 sees\", var.get())\n    await child(\"inline\")\n    print(\"main: after inline sees\", var.get())\n    await t2\n    loop = asyncio.get_running_loop()\n    loop.call_soon(lambda: print(\"cb: sees\", var.get()))\n    var.set(\"main-3\")\n    await asyncio.sleep(0)\n    await asyncio.to_thread(lambda: print(\"thread: sees\", var.get()))\n    await loop.run_in_executor(None, lambda: print(\"executor: sees\", var.get()))\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "Here is the exact output that the program writes to stdout, line by line:\n\n```json\n{\n  \"stdout\": [\n    \"t1: sees main-2\",\n    \"t2: sees main-2\",\n    \"t1: after sleep sees set-by-t1\",\n    \"t2: after sleep sees set-by-t2\",\n    \"main: after t1 sees set-by-t1\",\n    \"inline: sees set-by-t1\",\n    \"inline: after sleep sees set-by-inline\",\n    \"main: after inline sees set-by-inline\",\n    \"cb: sees set-by-inline\",\n    \"thread: sees root\",\n    \"executor: sees root\"\n  ]\n}\n```",
+  "latency": 7.77,
+  "tokens": 546,
+  "cost": 0.00026022,
+  "served_by": "deepseek/deepseek-chat",
+  "finish": "stop",
+  "graded": true,
+  "passed": false,
+  "partial": 0.636,
+  "reason": "diferente"
+}

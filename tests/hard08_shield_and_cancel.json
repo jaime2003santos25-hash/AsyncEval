@@ -1,0 +1,28 @@
+{
+  "id": "hard_08",
+  "title": "asyncio.shield: cancelling the outer does not cancel the inner",
+  "why_hard": "Cancelling the awaiting task leaves the shielded inner task running to completion. Requires tracking exactly when each cancellation and completion becomes visible across event-loop steps.",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def inner():\n    try:\n        print(\"inner: start\")\n        for _ in range(4):\n            await asyncio.sleep(0)\n        print(\"inner: done\")\n        return 42\n    except asyncio.CancelledError:\n        print(\"inner: cancelled\")\n        raise\n\nasync def outer(task):\n    try:\n        return await asyncio.shield(task)\n    except asyncio.CancelledError:\n        print(\"outer: cancelled\")\n        raise\n\nasync def main():\n    task = asyncio.create_task(inner())\n    o = asyncio.create_task(outer(task))\n    await asyncio.sleep(0)\n    await asyncio.sleep(0)\n    o.cancel()\n    try:\n        await o\n    except asyncio.CancelledError:\n        print(\"main: o cancelled =\", o.cancelled())\n    print(\"main: inner done =\", task.done())\n    print(\"main: inner result =\", await task)\n    print(\"main: end\")\n\nasyncio.run(main())\n```",
+  "expected_stdout": [
+    "inner: start",
+    "outer: cancelled",
+    "main: o cancelled = True",
+    "main: inner done = False",
+    "inner: done",
+    "main: inner result = 42",
+    "main: end"
+  ],
+  "reference_answer": [
+    "inner: start",
+    "outer: cancelled",
+    "main: o cancelled = True",
+    "main: inner done = False",
+    "inner: done",
+    "main: inner result = 42",
+    "main: end"
+  ],
+  "wrong_answers": [
+    "{\"stdout\": [\"main: end\", \"main: inner result = 42\", \"inner: done\", \"main: inner done = False\", \"main: o cancelled = True\", \"outer: cancelled\", \"inner: start\"]}",
+    "{\"stdout\": [\"inner: start\", \"outer: cancelled\", \"main: o cancelled = True\", \"main: inner done = False\", \"inner: done\", \"main: inner result = 42\"]}"
+  ]
+}

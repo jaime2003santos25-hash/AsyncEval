@@ -1,0 +1,21 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "name": "Gemini 3.5 Flash-Lite (free tier)",
+  "test": "hard05_eager_task_factory",
+  "title": "Python 3.12 eager task factory",
+  "trial": 2,
+  "temperature": 0.7,
+  "date": "2026-11-08",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def job(name):\n    print(f\"{name}: start\")\n    await asyncio.sleep(0)\n    print(f\"{name}: end\")\n\nasync def main():\n    loop = asyncio.get_running_loop()\n    loop.set_task_factory(asyncio.eager_task_factory)\n    t1 = asyncio.create_task(job(\"one\"))\n    print(\"main: after create one\")\n    t2 = asyncio.create_task(job(\"two\"))\n    print(\"main: after create two\")\n    await asyncio.gather(t1, t2)\n    print(\"main: done\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "To determine the exact output of the program, let's trace the execution step-by-step:\n\n1. `asyncio.run(main())` starts the default event loop and schedules the `main` coroutine.\n2. Inside `main()`, `loop.set_task_factory(asyncio.eager_task_factory)` is called. This enables eager execution for tasks created with `asyncio.create_task()`. With eager task factory, when a task is created, its coroutine is executed immediately until the first `await` point before returning the task object.\n3. `t1 = asyncio.create_task(job(\"one\"))` is called:\n   - `job(\"one\")` starts eagerly.\n   - It executes `print(\"one: start\")`, which prints `one: start`.\n   - It hits `await asyncio.sleep(0)`, which pauses execution and schedules resumption, returning control back to `main()`.\n4. `print(\"main: after create one\")` runs in `main()`, printing `main: after create one`.\n5. `t2 = asyncio.create_task(job(\"two\"))` is called:\n   - `job(\"two\")` starts eagerly.\n   - It executes `print(\"two: start\")`, which prints `two: start`.\n   - It hits `await asyncio.sleep(0)`, pausing and returning control back to `main()`.\n6. `print(\"main: after create two\")` runs in `main()`, printing `main: after create two`.\n7. `await asyncio.gather(t1, t2)` is executed. This yields control back to the event loop to await the completion of `t1` and `t2`.\n8. The event loop processes the completed/resumed tasks. The `sleep(0)` timers finish, and the remaining parts of `job(\"one\")` and `job(\"two\")` run.\n   - `job(\"one\")` finishes, executing `print(\"one: end\")`, printing `one: end`.\n   - `job(\"two\")` finishes, executing `print(\"two: end\")`, printing `two: end`.\n9. Once `gather` completes, `main()` resumes and executes `print(\"main: done\")`, printing `main: done`.\n\nThus, the exact lines written to stdout in order are:\n1. `one: start`\n2. `main: after create one`\n3. `two: start`\n4. `main: after create two`\n5. `one: end`\n6. `two: end`\n7. `main: done`\n\n```json\n{\"stdout\": [\"one: start\", \"main: after create one\", \"two: start\", \"main: after create two\", \"one: end\", \"two: end\", \"main: done\"]}\n```",
+  "latency": 2.51,
+  "tokens": 911,
+  "cost": 0,
+  "served_by": "gemini-3.5-flash-lite",
+  "finish": "stop",
+  "graded": true,
+  "passed": true,
+  "partial": 1.0,
+  "reason": "acerto exato"
+}

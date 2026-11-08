@@ -1,0 +1,21 @@
+{
+  "model": "deepseek/deepseek-chat",
+  "name": "DeepSeek chat",
+  "test": "hard08_shield_and_cancel",
+  "title": "asyncio.shield: cancelling the outer does not cancel the inner",
+  "trial": 1,
+  "temperature": 0.7,
+  "date": "2026-11-08",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def inner():\n    try:\n        print(\"inner: start\")\n        for _ in range(4):\n            await asyncio.sleep(0)\n        print(\"inner: done\")\n        return 42\n    except asyncio.CancelledError:\n        print(\"inner: cancelled\")\n        raise\n\nasync def outer(task):\n    try:\n        return await asyncio.shield(task)\n    except asyncio.CancelledError:\n        print(\"outer: cancelled\")\n        raise\n\nasync def main():\n    task = asyncio.create_task(inner())\n    o = asyncio.create_task(outer(task))\n    await asyncio.sleep(0)\n    await asyncio.sleep(0)\n    o.cancel()\n    try:\n        await o\n    except asyncio.CancelledError:\n        print(\"main: o cancelled =\", o.cancelled())\n    print(\"main: inner done =\", task.done())\n    print(\"main: inner result =\", await task)\n    print(\"main: end\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "The program will print the following lines to stdout in order:\n\n1. \"inner: start\"\n2. \"outer: cancelled\"\n3. \"main: o cancelled = True\"\n4. \"inner: done\"\n5. \"main: inner done = True\"\n6. \"main: inner result = 42\"\n7. \"main: end\"\n\nHere is the JSON object representing the output:\n\n```json\n{\"stdout\": [\"inner: start\", \"outer: cancelled\", \"main: o cancelled = True\", \"inner: done\", \"main: inner done = True\", \"main: inner result = 42\", \"main: end\"]}\n```",
+  "latency": 9.3,
+  "tokens": 502,
+  "cost": 0.00023816,
+  "served_by": "deepseek/deepseek-chat",
+  "finish": "stop",
+  "graded": true,
+  "passed": false,
+  "partial": 0.714,
+  "reason": "diferente"
+}

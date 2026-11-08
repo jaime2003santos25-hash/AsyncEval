@@ -1,0 +1,21 @@
+{
+  "model": "deepseek/deepseek-chat",
+  "name": "DeepSeek chat",
+  "test": "hard02_taskgroup_cleanup_order",
+  "title": "TaskGroup failure: order of sibling cleanup",
+  "trial": 3,
+  "temperature": 0.7,
+  "date": "2026-11-07",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def worker(name, delay_steps, fail=False):\n    try:\n        for i in range(delay_steps):\n            await asyncio.sleep(0)\n        if fail:\n            raise ValueError(name)\n        print(f\"{name}: finished\")\n    finally:\n        print(f\"{name}: finally start\")\n        await asyncio.sleep(0)\n        print(f\"{name}: finally end\")\n\nasync def main():\n    try:\n        async with asyncio.TaskGroup() as tg:\n            tg.create_task(worker(\"A\", 5))\n            tg.create_task(worker(\"B\", 2, fail=True))\n            tg.create_task(worker(\"C\", 1))\n        print(\"group: clean exit\")\n    except* ValueError as eg:\n        print(\"caught:\", [str(e) for e in eg.exceptions])\n    print(\"main: done\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "Let's analyze the program step by step:\n\n1. The `main` function creates a `TaskGroup` and schedules three tasks: `worker(\"A\", 5)`, `worker(\"B\", 2, fail=True)`, and `worker(\"C\", 1)`.\n\n2. Each worker runs concurrently:\n   - `worker(\"A\", 5)` iterates 5 times, yielding control back to the event loop each time with `await asyncio.sleep(0)`, then prints `\"A: finished\"` and executes its `finally` block.\n   - `worker(\"B\", 2, fail=True)` iterates 2 times, yielding control back to the event loop each time, then raises a `ValueError(\"B\")`. The `finally` block is executed regardless of the exception.\n   - `worker(\"C\", 1)` iterates once, yielding control back to the event loop, then prints `\"C: finished\"` and executes its `finally` block.\n\n3. The `TaskGroup` will raise an `ExceptionGroup` because `worker(\"B\", 2, fail=True)` raises a `ValueError`. The `except* ValueError` block catches this and prints `\"caught: ['B']\"`.\n\n4. After handling the exception, the program prints `\"main: done\"`.\n\n5. The order of execution for the workers is not guaranteed, but since `worker(\"C\", 1)` has the smallest delay, it will likely finish first, followed by `worker(\"B\", 2, fail=True)`, and then `worker(\"A\", 5)`.\n\n6. The `finally` blocks of each worker will execute in the order the workers complete.\n\nBased on this analysis, the program will print the following lines to stdout:\n\n```\nC: finished\nC: finally start\nC: finally end\nB: finally start\nB: finally end\nA: finished\nA: finally start\nA: finally end\ncaught: ['B']\nmain: done\n```\n\nThe JSON representation of the output is:\n```json\n{\"stdout\": [\"C: finished\", \"C: finally start\", \"C: finally end\", \"B: finally start\", \"B: finally end\", \"A: finished\", \"A: finally start\", \"A: finally end\", \"caught: ['B']\", \"main: done\"]}\n```",
+  "latency": 28.45,
+  "tokens": 830,
+  "cost": 0.00055003,
+  "served_by": "deepseek/deepseek-chat",
+  "finish": "stop",
+  "graded": true,
+  "passed": false,
+  "partial": 0.3,
+  "reason": "diferente"
+}

@@ -1,0 +1,21 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "name": "Gemini 3.5 Flash-Lite (free tier)",
+  "test": "hard06_threadlocal_pool_reuse",
+  "title": "threading.local with reused pool threads",
+  "trial": 1,
+  "temperature": 0.7,
+  "date": "2026-11-08",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport threading\nfrom concurrent.futures import ThreadPoolExecutor\n\nlocal = threading.local()\n\ndef task(n):\n    seen = getattr(local, \"value\", None)\n    local.value = n\n    return f\"task{n}: saw {seen}\"\n\nwith ThreadPoolExecutor(max_workers=1) as pool:\n    for n in range(3):\n        print(pool.submit(task, n).result())\n\nwith ThreadPoolExecutor(max_workers=1) as pool:\n    print(pool.submit(task, 9).result())\n\nprint(\"main thread value:\", getattr(local, \"value\", \"unset\"))\n```",
+  "status": "ok",
+  "reply": "To determine the exact output of the program, let's trace its execution step by step:\n\n1. `local = threading.local()` creates a thread-local storage object.\n2. The first `ThreadPoolExecutor` is created with `max_workers=1`. This means a single worker thread is created and reused for tasks submitted to this executor.\n3. Inside the loop `for n in range(3):`:\n   - `n = 0`: `task(0)` runs on the worker thread. `local.value` is initially `None` for this new thread. It sets `local.value = 0` and returns `\"task0: saw None\"`. `print()` outputs this line.\n   - `n = 1`: `task(1)` runs on the *same* worker thread because `max_workers=1`. `local.value` was previously set to `0` in this thread. It sees `0`, sets `local.value = 1`, and returns `\"task1: saw 0\"`. `print()` outputs this line.\n   - `n = 2`: `task(2)` runs on the same worker thread. It sees `local.value` as `1`, sets `local.value = 2`, and returns `\"task2: saw 1\"`. `print()` outputs this line.\n4. The first executor shuts down.\n5. A second `ThreadPoolExecutor` is created with `max_workers=1`. This spawns a *new* worker thread (since the old thread from the previous pool has been destroyed).\n6. `task(9)` is submitted to the second pool and runs on this new worker thread. Since it's a fresh thread, `local.value` is `None`. It sets `local.value = 9` and returns `\"task9: saw None\"`. `print()` outputs this line.\n7. Finally, in the main thread, `print(\"main thread value:\", getattr(local, \"value\", \"unset\"))` runs. The main thread has never had `local.value` assigned, so `getattr` falls back to `\"unset\"`. This outputs `\"main thread value: unset\"`.\n\nTherefore, the exact stdout lines are:\n- `task0: saw None`\n- `task1: saw 0`\n- `task2: saw 1`\n- `task9: saw None`\n- `main thread value: unset`\n\n```json\n{\"stdout\": [\"task0: saw None\", \"task1: saw 0\", \"task2: saw 1\", \"task9: saw None\", \"main thread value: unset\"]}\n```",
+  "latency": 3.24,
+  "tokens": 848,
+  "cost": 0,
+  "served_by": "gemini-3.5-flash-lite",
+  "finish": "stop",
+  "graded": true,
+  "passed": true,
+  "partial": 1.0,
+  "reason": "acerto exato"
+}

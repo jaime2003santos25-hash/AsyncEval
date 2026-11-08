@@ -1,0 +1,32 @@
+{
+  "id": "hard_02",
+  "title": "TaskGroup failure: order of sibling cleanup",
+  "why_hard": "Requires simulating the event loop step by step: which child finishes first, when the failing child raises, when siblings get cancelled, and how awaits inside finally blocks interleave. The order is a pure consequence of FIFO scheduling, not guessable.",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def worker(name, delay_steps, fail=False):\n    try:\n        for i in range(delay_steps):\n            await asyncio.sleep(0)\n        if fail:\n            raise ValueError(name)\n        print(f\"{name}: finished\")\n    finally:\n        print(f\"{name}: finally start\")\n        await asyncio.sleep(0)\n        print(f\"{name}: finally end\")\n\nasync def main():\n    try:\n        async with asyncio.TaskGroup() as tg:\n            tg.create_task(worker(\"A\", 5))\n            tg.create_task(worker(\"B\", 2, fail=True))\n            tg.create_task(worker(\"C\", 1))\n        print(\"group: clean exit\")\n    except* ValueError as eg:\n        print(\"caught:\", [str(e) for e in eg.exceptions])\n    print(\"main: done\")\n\nasyncio.run(main())\n```",
+  "expected_stdout": [
+    "C: finished",
+    "C: finally start",
+    "B: finally start",
+    "C: finally end",
+    "B: finally end",
+    "A: finally start",
+    "A: finally end",
+    "caught: ['B']",
+    "main: done"
+  ],
+  "reference_answer": [
+    "C: finished",
+    "C: finally start",
+    "B: finally start",
+    "C: finally end",
+    "B: finally end",
+    "A: finally start",
+    "A: finally end",
+    "caught: ['B']",
+    "main: done"
+  ],
+  "wrong_answers": [
+    "{\"stdout\": [\"main: done\", \"caught: ['B']\", \"A: finally end\", \"A: finally start\", \"B: finally end\", \"C: finally end\", \"B: finally start\", \"C: finally start\", \"C: finished\"]}",
+    "{\"stdout\": [\"C: finished\", \"C: finally start\", \"B: finally start\", \"C: finally end\", \"B: finally end\", \"A: finally start\", \"A: finally end\", \"caught: ['B']\"]}"
+  ]
+}

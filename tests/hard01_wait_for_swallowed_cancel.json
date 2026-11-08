@@ -1,0 +1,22 @@
+{
+  "id": "hard_01",
+  "title": "wait_for when the coroutine swallows cancellation",
+  "why_hard": "In Python 3.12 asyncio.wait_for runs the awaitable inside the caller's task under asyncio.timeout(). If the coroutine catches CancelledError and returns normally, no TimeoutError is raised and wait_for returns the value. Models assume a timeout always yields TimeoutError.",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def stubborn():\n    try:\n        await asyncio.sleep(10)\n    except asyncio.CancelledError:\n        print(\"stubborn: cancelled, cleaning up\")\n        await asyncio.sleep(0)\n        print(\"stubborn: cleanup done\")\n        return \"recovered\"\n    return \"finished\"\n\nasync def main():\n    try:\n        result = await asyncio.wait_for(stubborn(), timeout=0.05)\n        print(\"result:\", result)\n    except asyncio.TimeoutError:\n        print(\"main: timeout\")\n    except asyncio.CancelledError:\n        print(\"main: cancelled\")\n    print(\"main: done\")\n\nasyncio.run(main())\n```",
+  "expected_stdout": [
+    "stubborn: cancelled, cleaning up",
+    "stubborn: cleanup done",
+    "result: recovered",
+    "main: done"
+  ],
+  "reference_answer": [
+    "stubborn: cancelled, cleaning up",
+    "stubborn: cleanup done",
+    "result: recovered",
+    "main: done"
+  ],
+  "wrong_answers": [
+    "{\"stdout\": [\"main: done\", \"result: recovered\", \"stubborn: cleanup done\", \"stubborn: cancelled, cleaning up\"]}",
+    "{\"stdout\": [\"stubborn: cancelled, cleaning up\", \"stubborn: cleanup done\", \"result: recovered\"]}"
+  ]
+}

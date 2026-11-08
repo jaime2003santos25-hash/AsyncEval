@@ -1,0 +1,21 @@
+{
+  "model": "deepseek/deepseek-chat",
+  "name": "DeepSeek chat",
+  "test": "hard01_wait_for_swallowed_cancel",
+  "title": "wait_for when the coroutine swallows cancellation",
+  "trial": 3,
+  "temperature": 0.7,
+  "date": "2026-11-08",
+  "prompt": "You are given a Python 3.12 program (CPython 3.12, default asyncio event loop, run as `python program.py`).\nPredict EXACTLY what it writes to stdout, line by line, in order. Ignore stderr.\nThink as carefully as you need. Then finish your reply with ONE JSON object on its own, in this exact shape:\n{\"stdout\": [\"first line\", \"second line\"]}\nEach list item is one line of stdout without the trailing newline. If nothing is printed, use {\"stdout\": []}.\n\n```python\nimport asyncio\n\nasync def stubborn():\n    try:\n        await asyncio.sleep(10)\n    except asyncio.CancelledError:\n        print(\"stubborn: cancelled, cleaning up\")\n        await asyncio.sleep(0)\n        print(\"stubborn: cleanup done\")\n        return \"recovered\"\n    return \"finished\"\n\nasync def main():\n    try:\n        result = await asyncio.wait_for(stubborn(), timeout=0.05)\n        print(\"result:\", result)\n    except asyncio.TimeoutError:\n        print(\"main: timeout\")\n    except asyncio.CancelledError:\n        print(\"main: cancelled\")\n    print(\"main: done\")\n\nasyncio.run(main())\n```",
+  "status": "ok",
+  "reply": "The program uses `asyncio` to manage asynchronous tasks, specifically handling a timeout scenario and cancellation. Here's the step-by-step execution:\n\n1. **`main()` function starts**: It schedules the `stubborn()` coroutine to run but with a timeout of 0.05 seconds using `asyncio.wait_for`.\n\n2. **`stubborn()` coroutine starts**: It attempts to sleep for 10 seconds (`await asyncio.sleep(10)`), but since the timeout is set to 0.05 seconds, it doesn't complete.\n\n3. **Timeout occurs**: After 0.05 seconds, `asyncio.wait_for` raises a `TimeoutError`. This cancels the `stubborn()` task, triggering a `CancelledError` inside `stubborn()`.\n\n4. **`stubborn()` handles cancellation**:\n   - It catches the `CancelledError` and prints `\"stubborn: cancelled, cleaning up\"`.\n   - It performs a cleanup operation by sleeping for 0 seconds (`await asyncio.sleep(0)`).\n   - It prints `\"stubborn: cleanup done\"` and returns `\"recovered\"`.\n\n5. **`main()` handles timeout**:\n   - It catches the `TimeoutError` and prints `\"main: timeout\"`.\n\n6. **`main()` completes**:\n   - It prints `\"main: done\"`.\n\nThus, the program writes the following lines to stdout, in order:\n\n```\nstubborn: cancelled, cleaning up\nstubborn: cleanup done\nmain: timeout\nmain: done\n```\n\n```json\n{\"stdout\": [\"stubborn: cancelled, cleaning up\", \"stubborn: cleanup done\", \"main: timeout\", \"main: done\"]}\n```",
+  "latency": 23.84,
+  "tokens": 654,
+  "cost": 0.00041676,
+  "served_by": "deepseek/deepseek-chat",
+  "finish": "stop",
+  "graded": true,
+  "passed": false,
+  "partial": 0.75,
+  "reason": "diferente"
+}
